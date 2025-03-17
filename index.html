@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Categories & Sản phẩm</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+  <h1>Quản lý Categories & Sản phẩm</h1>
+
+  <div class="flex-row">
+    <div class="column">
+      <h2>Tạo Category</h2>
+      <form id="categoryForm">
+        <input type="text" id="catId" placeholder="ID" required />
+        <input type="text" id="catName" placeholder="Name" required />
+        <textarea id="catDescription" placeholder="Description" rows="3"></textarea>
+        <button type="submit">Thêm Category</button>
+      </form>
+    </div>
+
+    <div class="column">
+      <h2>Tạo Sản phẩm</h2>
+      <form id="productForm">
+        <input type="text" id="prodId" placeholder="ID" required />
+        <input type="text" id="prodName" placeholder="Name" required />
+        <input type="number" id="prodPrice" placeholder="Price" required />
+        <input type="number" id="prodOldPrice" placeholder="Old Price" />
+        <select id="prodCategory" required>
+          <option value="">Chọn Category</option>
+        </select>
+        <textarea id="prodDescription" placeholder="Description" rows="3"></textarea>
+        <input type="url" id="prodImage" placeholder="Image URL" />
+        <button type="submit">Thêm Sản phẩm</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Danh sách Categories</h3>
+    <div id="categoryList" class="list"></div>
+  </div>
+
+  <div class="section">
+    <h3>Danh sách Sản phẩm</h3>
+    <div id="productList"></div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      var categories = [];
+      var products = [];
+
+      $('#categoryForm').submit(function(e) {
+        e.preventDefault();
+
+        var catId = $('#catId').val().trim();
+        var catName = $('#catName').val().trim();
+        var catDescription = $('#catDescription').val().trim();
+
+        if (!catId || !catName) {
+          alert('Vui lòng nhập đầy đủ thông tin!');
+          return;
+        }
+
+        if (categories.find(c => c.id === catId)) {
+          alert('ID Category đã tồn tại!');
+          return;
+        }
+
+        var category = {
+          id: catId,
+          name: catName,
+          description: catDescription
+        };
+
+        categories.push(category);
+        renderCategories();
+        updateCategoryDropdown();
+
+        $('#categoryForm')[0].reset();
+      });
+
+      function renderCategories() {
+        $('#categoryList').empty();
+        categories.forEach(function(cat) {
+          $('#categoryList').append(`
+            <div class="item">
+              <strong>${cat.name}</strong> (ID: ${cat.id})<br/>
+              <small>${cat.description}</small>
+            </div>
+          `);
+        });
+      }
+
+      function updateCategoryDropdown() {
+        $('#prodCategory').empty();
+        $('#prodCategory').append('<option value="">Chọn Category</option>');
+        categories.forEach(function(cat) {
+          $('#prodCategory').append(`<option value="${cat.id}">${cat.name}</option>`);
+        });
+      }
+
+      $('#productForm').submit(function(e) {
+        e.preventDefault();
+
+        var prodId = $('#prodId').val().trim();
+        var prodName = $('#prodName').val().trim();
+        var prodPrice = parseFloat($('#prodPrice').val());
+        var prodOldPrice = parseFloat($('#prodOldPrice').val()) || 0;
+        var prodCategory = $('#prodCategory').val();
+        var prodDescription = $('#prodDescription').val().trim();
+        var prodImage = $('#prodImage').val().trim();
+
+        if (!prodId || !prodName || !prodPrice || !prodCategory) {
+          alert('Vui lòng nhập đầy đủ thông tin sản phẩm!');
+          return;
+        }
+
+        if (products.find(p => p.id === prodId)) {
+          alert('ID sản phẩm đã tồn tại!');
+          return;
+        }
+
+        var product = {
+          id: prodId,
+          name: prodName,
+          price: prodPrice,
+          oldPrice: prodOldPrice,
+          category: prodCategory,
+          description: prodDescription,
+          image: prodImage
+        };
+
+        products.push(product);
+        renderProducts();
+
+        $('#productForm')[0].reset();
+      });
+
+      function renderProducts() {
+        $('#productList').empty();
+        products.forEach(function(prod) {
+          var catName = categories.find(c => c.id === prod.category)?.name || 'Unknown';
+
+          $('#productList').append(`
+            <div class="product-card">
+              <img class="product-image" src="${prod.image || 'https://via.placeholder.com/200x180?text=No+Image'}" alt="${prod.name}" />
+              <div class="product-info">
+                <div class="product-name">${prod.name}</div>
+                <div class="product-category">Category: ${catName}</div>
+                <div>
+                  <span class="product-price">${prod.price.toLocaleString()} ₫</span>
+                  ${prod.oldPrice > 0 ? `<span class="product-old-price">${prod.oldPrice.toLocaleString()} ₫</span>` : ''}
+                </div>
+                <div class="product-description">${prod.description}</div>
+              </div>
+              <button class="btn-buy">Mua ngay</button>
+            </div>
+          `);
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
